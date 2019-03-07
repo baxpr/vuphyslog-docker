@@ -3,12 +3,9 @@
 import os
 import re
 import datetime
-import pydicom
-import pynetdicom
 import argparse
 import json
-import tempfile
-
+import physlog_query
 
 # Specify and parse command line arguments
 parser = argparse.ArgumentParser('Package a physlog file and upload to PACS')
@@ -32,66 +29,6 @@ parser.add_argument('--jpg_file',required=True,
                     help='JPG that will be affixed to the physlog to '
                          'allow conversion to DICOM')
 args = parser.parse_args()
-
-
-# Function to run a query
-def query(studydate):
-    """
-    Query PACS for all scans on studydate. Doing this with pynetdicom
-    is more trouble, but probably more reliable than using dcm4che
-    dcmqr and parsing its text output.
-
-    """
-
-    # Initialise the Application Entity and add presentation context
-    ae = pynetdicom.AE()
-    ae.add_requested_context(pynetdicom.sop_class.
-                             PatientRootQueryRetrieveInformationModelFind)
-
-    # Create our query dataset
-    ds = pydicom.dataset.Dataset()
-
-    # Query will match on these items
-    ds.StudyDate = studydate
-    ds.QueryRetrieveLevel = 'SERIES'
-    ds.Modality = 'MR'
-
-    # Query will additionally return these items
-    ds.add_new(0x0020000E, 'UI', '')  # Series Instance UID
-    ds.add_new(0x0020000D, 'UI', '')  # Study Instance UID
-    ds.add_new(0x00080031, 'TM', '')  # Series Time
-    ds.add_new(0x0008103E, 'LO', '')  # Series Description
-    ds.add_new(0x00200011, 'IS', '')  # Series Number
-    ds.add_new(0x00081010, 'SH', '')  # Station Name
-    ds.add_new(0x00400241, 'AE', '')  # Performed Station AE Title
-    ds.add_new(0x00100010, 'PN', '')  # Patient Name
-    ds.add_new(0x00100020, 'LO', '')  # Patient ID
-    ds.add_new(0x00200010, 'SH', '')  # Study ID
-
-    # Initialize result
-    seriesdata = list()
-
-    # Associate with peer AE
-    assoc = ae.associate(args.pacs_ip,
-                         int(args.pacs_port),
-                         ae_title=args.pacs_aetitle)
-
-    if assoc.is_established:
-        responses = assoc.send_c_find(ds, query_model='P')
-
-        for (status, identifier) in responses:
-            if status:
-                if status.Status in (0xFF00, 0xFF01):
-                    seriesdata = seriesdata + [identifier]
-            else:
-                print('Connection failed')
-
-        assoc.release()
-    else:
-        print('Association rejected')
-
-    ae.shutdown()
-    return seriesdata
 
 
 # Check that the physfile exists
@@ -151,7 +88,12 @@ elif num_stationmatches>1:
 
 
 # Query PACS for scans on this date
-seriesdata = query(P.group('date'))
+pacs = {
+    'ip':args.pacs_ip,
+    'port':args.pacs_port,
+    'aetitle':args.pacs_aetitle
+}
+seriesdata = physlog_query.query(P.group('date'),pacs)
 
 
 # Drop records that aren't from the physlog's scanner.

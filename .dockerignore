@@ -3,6 +3,6 @@
 !build.sh
 !README.md
 !example_usage.sh
-!physlog.py
+!physlog*.py
 !vuphyslog.jpg
 !requirements.txt
