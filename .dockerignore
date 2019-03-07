@@ -1,1 +1,4 @@
 test.sh
+SCANPHYSLOG*
+scanner_stations.json
+.git*
