@@ -1,4 +1,8 @@
-test.sh
-SCANPHYSLOG*
-scanner_stations.json
-.git*
+*
+!Dockerfile
+!build.sh
+!README.md
+!example_usage.sh
+!physlog.py
+!vuphyslog.jpg
+!requirements.txt
