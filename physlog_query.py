@@ -1,3 +1,4 @@
+import re
 import pydicom
 import pynetdicom
 
@@ -38,9 +39,11 @@ def query(studydate,pacs):
     seriesdata = list()
 
     # Associate with peer AE
-    assoc = ae.associate(pacs['ip'],
-                         int(pacs['port']),
-                         ae_title=pacs['aetitle'])
+    rx = re.compile('(?P<aetitle>.+)@(?P<ip>\d+\.\d+\.\d+\.\d+):(?P<port>\d+)')
+    rxp = rx.search(pacs)
+    assoc = ae.associate(rxp.group('ip'),
+                         int(rxp.group('port')),
+                         ae_title=rxp.group('aetitle'))
 
     if assoc.is_established:
         responses = assoc.send_c_find(ds, query_model='P')

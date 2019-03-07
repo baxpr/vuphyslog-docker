@@ -9,12 +9,8 @@ import physlog_query
 
 # Specify and parse command line arguments
 parser = argparse.ArgumentParser('Package a physlog file and upload to PACS')
-parser.add_argument('--pacs_ip',required=True,
-                    help='PACS IP address')
-parser.add_argument('--pacs_port',required=True,
-                    help='PACS port')
-parser.add_argument('--pacs_aetitle',required=True,
-                    help='PACS AE Title')
+parser.add_argument('--pacs',required=True,
+                    help='PACS as AETITLE@nnn.nnn.nnn.nnn:PORT')
 parser.add_argument('--stations_file',required=True,
                     help='JSON format file with scanner station IDs')
 parser.add_argument('--physlog_file',required=True,
@@ -88,12 +84,7 @@ elif num_stationmatches>1:
 
 
 # Query PACS for scans on this date
-pacs = {
-    'ip':args.pacs_ip,
-    'port':args.pacs_port,
-    'aetitle':args.pacs_aetitle
-}
-seriesdata = physlog_query.query(P.group('date'),pacs)
+seriesdata = physlog_query.query(P.group('date'),args.pacs)
 
 
 # Drop records that aren't from the physlog's scanner.
@@ -186,11 +177,7 @@ os.system(' '.join(['jpg2dcm -c',cfgfile,jpgfile,dcmfile]))
 
 # Call dcmsnd to push to PACS. We could also use pynetdicom here
 # but this is trivially easy.
-os.system(''.join(['dcmsnd ',
-                   args.pacs_aetitle,'@',
-                   args.pacs_ip,':',
-                   args.pacs_port,' ',
-                   dcmfile]))
+os.system(' '.join(['dcmsnd',args.pacs,dcmfile]))
 
 # Clean up
 os.remove(jpgfile)
