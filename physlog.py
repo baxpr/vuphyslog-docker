@@ -35,7 +35,9 @@ if not os.path.isfile(args.physlog_file):
 # Parse the physlog filename to get path, date, and time
 rxP = re.compile('(?P<path>.*)SCANPHYSLOG(?P<date>\d{8})(?P<time>\d{6}).log$')
 P = rxP.search(args.physlog_file)
-
+if P is None:
+    raise Exception('Unable to parse physlog filename {}'.
+    format(args.physlog_file))
 
 # Set up remaining filenames. We'll use the same dir as the physlog, and fail
 # if any are present
