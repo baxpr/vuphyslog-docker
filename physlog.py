@@ -141,7 +141,7 @@ if (mindelta < 59) or (mindelta > 61):
 # the Series UID that id's our scanner, and the final field of the
 # Series UID that is the timestamp. Possibly only true locally.
 fields = seriesmatch[tag_SeriesInstanceUID].value.split('.')
-instance_uid = '.'.join((args.unique_root,fields[5],fields[-1]))
+instance_uid = '.'.join((args.unique_root,'2',fields[5],fields[-1]))
 
 
 # Create a cfg file for jpg2dcm, with correct UIDs and info. We are reusing
