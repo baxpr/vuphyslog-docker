@@ -149,6 +149,7 @@ instance_uid = '.'.join((args.unique_root,'2',fields[5],fields[-1]))
 # back empty in the initial query.
 contentdate = datetime.datetime.strftime(datetime.datetime.now(),'%Y%m%d')
 contenttime = datetime.datetime.strftime(datetime.datetime.now(),'%H%M%S')
+imagetype = 'SCANPHYSLOG' + P.group('date') + P.group('time')
 with open(cfgfile,'w') as f:
     f.write('# Study ID\n00200010:' + seriesmatch[0x00200010].value + '\n\n')
     f.write('# Series Number\n00200011:' + str(seriesmatch[0x00200011].value) + '\n\n')
@@ -158,7 +159,7 @@ with open(cfgfile,'w') as f:
     f.write('# Series Description\n0008103E:' + seriesmatch[0x0008103E].value + '\n\n')
     f.write('# StudyInstanceUID\n0020000D:' + seriesmatch[0x0020000D].value + '\n\n')
     f.write('# SeriesInstanceUID\n0020000E:' + seriesmatch[0x0020000E].value + '\n\n')
-    f.write('# Image Type\n00080008:SCANPHYSLOG' + P.group('date') + P.group('time') + '\n\n')
+    f.write('# Image Type\n00080008:' + imagetype + '\n\n')
     f.write('# SOPInstanceUID\n00080018:' + instance_uid + '\n\n')
     f.write('# Content Date\n00080023:' + contentdate + '\n\n')
     f.write('# Content Time\n00080033:' + contenttime + '\n\n')
